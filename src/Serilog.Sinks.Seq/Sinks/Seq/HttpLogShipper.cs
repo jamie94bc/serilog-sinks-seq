@@ -31,7 +31,7 @@ namespace Serilog.Sinks.Seq
         const string ApiKeyHeaderName = "X-Seq-ApiKey";
         const string BulkUploadResource = "api/events/raw";
 
-        public HttpLogShipper(string serverUrl, string bufferBaseFilename, string apiKey, int batchPostingLimit, TimeSpan period)
+        public HttpLogShipper(string serverUrl, string bufferBaseFilename, string apiKey, int batchPostingLimit, TimeSpan period, HttpMessageHandler httpMessageHandler = null)
         {
             _apiKey = apiKey;
             _batchPostingLimit = batchPostingLimit;
@@ -41,7 +41,7 @@ namespace Serilog.Sinks.Seq
             if (!baseUri.EndsWith("/"))
                 baseUri += "/";
 
-            _httpClient = new HttpClient { BaseAddress = new Uri(baseUri) };
+            _httpClient = new HttpClient(httpMessageHandler ?? new HttpClientHandler(), true) { BaseAddress = new Uri(baseUri) };
 
             _bookmarkFilename = Path.GetFullPath(bufferBaseFilename + ".bookmark");
             _logFolder = Path.GetDirectoryName(_bookmarkFilename);

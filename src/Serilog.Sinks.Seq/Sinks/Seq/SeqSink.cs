@@ -41,7 +41,7 @@ namespace Serilog.Sinks.Seq
         public const int DefaultBatchPostingLimit = 1000;
         public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(2);
 
-        public SeqSink(string serverUrl, string apiKey, int batchPostingLimit, TimeSpan period)
+        public SeqSink(string serverUrl, string apiKey, int batchPostingLimit, TimeSpan period, HttpMessageHandler httpMessageHandler = null)
             : base(batchPostingLimit, period)
         {
             if (serverUrl == null) throw new ArgumentNullException("serverUrl");
@@ -51,7 +51,7 @@ namespace Serilog.Sinks.Seq
             if (!baseUri.EndsWith("/"))
                 baseUri += "/";
 
-            _httpClient = new HttpClient { BaseAddress = new Uri(baseUri) };
+            _httpClient = new HttpClient(httpMessageHandler ?? new HttpClientHandler(), true) { BaseAddress = new Uri(baseUri) };
         }
 
         protected override void Dispose(bool disposing)

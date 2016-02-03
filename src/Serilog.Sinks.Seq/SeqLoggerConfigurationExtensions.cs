@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
@@ -40,6 +41,8 @@ namespace Serilog
         /// <param name="apiKey">A Seq <i>API key</i> that authenticates the client to the Seq server.</param>
         /// <param name="bufferFileSizeLimitBytes">The maximum size, in bytes, to which the buffer
         /// log file for a specific date will be allowed to grow. By default no limit will be applied.</param>
+        /// <param name="httpMessageHandler">Optional <see cref="HttpMessageHandler"/> to use with the <see cref="HttpClient"/>
+        /// when sending events to Seq.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Seq(
@@ -50,7 +53,8 @@ namespace Serilog
             TimeSpan? period = null,
             string apiKey = null,
             string bufferBaseFilename = null,
-            long? bufferFileSizeLimitBytes = null)
+            long? bufferFileSizeLimitBytes = null,
+            HttpMessageHandler httpMessageHandler = null)
         {
             if (loggerSinkConfiguration == null) throw new ArgumentNullException("loggerSinkConfiguration");
             if (serverUrl == null) throw new ArgumentNullException("serverUrl");
@@ -60,9 +64,9 @@ namespace Serilog
 
             ILogEventSink sink;
             if (bufferBaseFilename == null)
-                sink = new SeqSink(serverUrl, apiKey, batchPostingLimit, defaultedPeriod);
+                sink = new SeqSink(serverUrl, apiKey, batchPostingLimit, defaultedPeriod, httpMessageHandler);
             else
-                sink = new DurableSeqSink(serverUrl, bufferBaseFilename, apiKey, batchPostingLimit, defaultedPeriod, bufferFileSizeLimitBytes);
+                sink = new DurableSeqSink(serverUrl, bufferBaseFilename, apiKey, batchPostingLimit, defaultedPeriod, bufferFileSizeLimitBytes, httpMessageHandler);
 
             return loggerSinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }

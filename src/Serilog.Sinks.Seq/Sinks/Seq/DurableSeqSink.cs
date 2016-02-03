@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Net.Http;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Json;
@@ -25,12 +26,12 @@ namespace Serilog.Sinks.Seq
         readonly HttpLogShipper _shipper;
         readonly RollingFileSink _sink;
 
-        public DurableSeqSink(string serverUrl, string bufferBaseFilename, string apiKey, int batchPostingLimit, TimeSpan period, long? bufferFileSizeLimitBytes)
+        public DurableSeqSink(string serverUrl, string bufferBaseFilename, string apiKey, int batchPostingLimit, TimeSpan period, long? bufferFileSizeLimitBytes, HttpMessageHandler httpMessageHandler = null)
         {
             if (serverUrl == null) throw new ArgumentNullException("serverUrl");
             if (bufferBaseFilename == null) throw new ArgumentNullException("bufferBaseFilename");
 
-            _shipper = new HttpLogShipper(serverUrl, bufferBaseFilename, apiKey, batchPostingLimit, period);
+            _shipper = new HttpLogShipper(serverUrl, bufferBaseFilename, apiKey, batchPostingLimit, period, httpMessageHandler);
             _sink = new RollingFileSink(
                 bufferBaseFilename + "-{Date}.json",
                 new JsonFormatter(),
